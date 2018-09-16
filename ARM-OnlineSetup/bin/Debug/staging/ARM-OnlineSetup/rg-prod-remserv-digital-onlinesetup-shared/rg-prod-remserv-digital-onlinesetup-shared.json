@@ -1,0 +1,295 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "asp-prod-remserv-digital-online-setup-sharedName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "asp-prod-remserv-digital-online-setup-sharedSkuName": {
+      "type": "string",
+      "defaultValue": "F1",
+      "allowedValues": [
+        "F1",
+        "D1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3",
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "metadata": {
+        "description": "Describes plan's pricing tier and capacity. Check details at https://azure.microsoft.com/en-us/pricing/details/app-service/"
+      }
+    },
+    "asp-prod-digital-onlinesetup-sharedName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "asp-prod-digital-onlinesetup-sharedSkuName": {
+      "type": "string",
+      "defaultValue": "F1",
+      "allowedValues": [
+        "F1",
+        "D1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3",
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "metadata": {
+        "description": "Describes plan's pricing tier and capacity. Check details at https://azure.microsoft.com/en-us/pricing/details/app-service/"
+      }
+    },
+    "siteName": {
+      "type": "string"
+    },
+    "siteResourceGroup": {
+      "type": "string"
+    }
+    },
+  "variables": {
+    "stProdDigitalOnlineSetupSharedName": "[concat('stProdDigitalOnlineSetupShared', uniqueString(resourceGroup().id))]"},
+  "resources": [
+    {
+      "name": "[parameters('asp-prod-digital-onlinesetup-sharedName')]",
+      "type": "Microsoft.Web/serverfarms",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-08-01",
+      "sku": {
+        "name": "[parameters('asp-prod-digital-onlinesetup-sharedSkuName')]"
+      },
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "asp-prod-digital-onlinesetup-shared"
+      },
+      "properties": {
+        "name": "[parameters('asp-prod-digital-onlinesetup-sharedName')]",
+        "numberOfWorkers": 1
+      }
+    },
+    {
+      "name": "[concat(parameters('asp-prod-digital-onlinesetup-sharedName'), '-', resourceGroup().name)]",
+      "type": "Microsoft.Insights/autoscalesettings",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2014-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('asp-prod-digital-onlinesetup-sharedName'))]"
+      ],
+      "tags": {
+        "[concat('hidden-link:', resourceId('Microsoft.Web/serverfarms', parameters('asp-prod-digital-onlinesetup-sharedName')))]": "Resource",
+        "displayName": "ai-prod-digital-onlinesetup-shared AutoScale"
+      },
+      "properties": {
+        "name": "[concat(parameters('asp-prod-digital-onlinesetup-sharedName'), '-', resourceGroup().name)]",
+        "profiles": [
+          {
+            "name": "Default",
+            "capacity": {
+              "minimum": 1,
+              "maximum": 2,
+              "default": 1
+            },
+            "rules": [
+              {
+                "metricTrigger": {
+                  "metricName": "CpuPercentage",
+                  "metricResourceUri": "[resourceId('Microsoft.Web/serverfarms', parameters('asp-prod-digital-onlinesetup-sharedName'))]",
+                  "timeGrain": "PT1M",
+                  "statistic": "Average",
+                  "timeWindow": "PT10M",
+                  "timeAggregation": "Average",
+                  "operator": "GreaterThan",
+                  "threshold": 80
+                },
+                "scaleAction": {
+                  "direction": "Increase",
+                  "type": "ChangeCount",
+                  "value": 1,
+                  "cooldown": "PT10M"
+                }
+              },
+              {
+                "metricTrigger": {
+                  "metricName": "CpuPercentage",
+                  "metricResourceUri": "[resourceId('Microsoft.Web/serverfarms', parameters('asp-prod-digital-onlinesetup-sharedName'))]",
+                  "timeGrain": "PT1M",
+                  "statistic": "Average",
+                  "timeWindow": "PT1H",
+                  "timeAggregation": "Average",
+                  "operator": "LessThan",
+                  "threshold": 60
+                },
+                "scaleAction": {
+                  "direction": "Decrease",
+                  "type": "ChangeCount",
+                  "value": 1,
+                  "cooldown": "PT1H"
+                }
+              }
+            ]
+          }
+        ],
+        "enabled": false,
+        "targetResourceUri": "[resourceId('Microsoft.Web/serverfarms', parameters('asp-prod-digital-onlinesetup-sharedName'))]"
+      }
+    },
+    {
+      "name": "[concat('CPUHigh ', parameters('asp-prod-digital-onlinesetup-sharedName'))]",
+      "type": "Microsoft.Insights/alertrules",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2014-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('asp-prod-digital-onlinesetup-sharedName'))]"
+      ],
+      "tags": {
+        "[concat('hidden-link:', resourceId('Microsoft.Web/serverfarms', parameters('asp-prod-digital-onlinesetup-sharedName')))]": "Resource",
+        "displayName": "CPUHigh ai-prod-digital-onlinesetup-shared"
+      },
+      "properties": {
+        "name": "[concat('CPUHigh ', parameters('asp-prod-digital-onlinesetup-sharedName'))]",
+        "description": "[concat('The average CPU is high across all the instances of ', parameters('asp-prod-digital-onlinesetup-sharedName'))]",
+        "isEnabled": false,
+        "condition": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
+          "dataSource": {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
+            "resourceUri": "[resourceId('Microsoft.Web/serverfarms', parameters('asp-prod-digital-onlinesetup-sharedName'))]",
+            "metricName": "CpuPercentage"
+          },
+          "operator": "GreaterThan",
+          "threshold": 90,
+          "windowSize": "PT15M"
+        },
+        "action": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
+          "sendToServiceOwners": true,
+          "customEmails": [ ]
+        }
+      }
+    },
+    {
+      "name": "[concat('LongHttpQueue ', parameters('asp-prod-digital-onlinesetup-sharedName'))]",
+      "type": "Microsoft.Insights/alertrules",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2014-04-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('asp-prod-digital-onlinesetup-sharedName'))]"
+      ],
+      "tags": {
+        "[concat('hidden-link:', resourceId('Microsoft.Web/serverfarms', parameters('asp-prod-digital-onlinesetup-sharedName')))]": "Resource",
+        "displayName": "LongHttpQueue ai-prod-digital-onlinesetup-shared"
+      },
+      "properties": {
+        "name": "[concat('LongHttpQueue ', parameters('asp-prod-digital-onlinesetup-sharedName'))]",
+        "description": "[concat('The HTTP queue for the instances of ', parameters('asp-prod-digital-onlinesetup-sharedName'), ' has a large number of pending requests.')]",
+        "isEnabled": false,
+        "condition": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
+          "dataSource": {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
+            "resourceUri": "[resourceId('Microsoft.Web/serverfarms', parameters('asp-prod-digital-onlinesetup-sharedName'))]",
+            "metricName": "HttpQueueLength"
+          },
+          "operator": "GreaterThan",
+          "threshold": 100,
+          "windowSize": "PT5M"
+        },
+        "action": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
+          "sendToServiceOwners": true,
+          "customEmails": [ ]
+        }
+      }
+    },
+    {
+      "name": "[concat('ServerErrors ', 'ai-prod-digital-onlinesetup-shared')]",
+      "type": "Microsoft.Insights/alertrules",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2014-04-01",
+      "dependsOn": [ ],
+      "tags": {
+        "[concat('hidden-link:', resourceId(parameters('siteResourceGroup'), 'Microsoft.Web/sites', parameters('siteName')))]": "Resource",
+        "displayName": "ServerErrors ai-prod-digital-onlinesetup-shared"
+      },
+      "properties": {
+        "name": "[concat('ServerErrors ', parameters('siteName'))]",
+        "description": "[concat(parameters('siteName'), ' has some server errors, status code 5xx.')]",
+        "isEnabled": false,
+        "condition": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
+          "dataSource": {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
+            "resourceUri": "[resourceId(parameters('siteResourceGroup'), 'Microsoft.Web/sites', parameters('siteName'))]",
+            "metricName": "Http5xx"
+          },
+          "operator": "GreaterThan",
+          "threshold": 0,
+          "windowSize": "PT5M"
+        },
+        "action": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
+          "sendToServiceOwners": true,
+          "customEmails": [ ]
+        }
+      }
+    },
+    {
+      "name": "[concat('ForbiddenRequests ', 'ai-prod-digital-onlinesetup-shared')]",
+      "type": "Microsoft.Insights/alertrules",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2014-04-01",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "ForbiddenRequests ai-prod-digital-onlinesetup-shared"
+      },
+      "properties": {
+        "name": "[concat('ForbiddenRequests ', parameters('siteName'))]",
+        "description": "[concat(parameters('siteName'), ' has some requests that are forbidden, status code 403.')]",
+        "isEnabled": false,
+        "condition": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
+          "dataSource": {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
+            "resourceUri": "[resourceId(parameters('siteResourceGroup'), 'Microsoft.Web/sites', parameters('siteName'))]",
+            "metricName": "Http403"
+          },
+          "operator": "GreaterThan",
+          "threshold": 0,
+          "windowSize": "PT5M"
+        },
+        "action": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
+          "sendToServiceOwners": true,
+          "customEmails": [ ]
+        }
+      }
+    },
+    {
+      "name": "ai-prod-digital-onlinesetup-shared",
+      "type": "Microsoft.Insights/components",
+      "location": "East US",
+      "apiVersion": "2014-04-01",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "Component ai-prod-digital-onlinesetup-shared"
+      },
+      "properties": {
+        "applicationId": "[resourceId(parameters('siteResourceGroup'), 'Microsoft.Web/sites', parameters('siteName'))]"
+      }
+    }
+    
+    ],
+  "outputs": {}
+}

@@ -1,0 +1,15 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+  "parameters": {
+    "storageAccounts_stproddigitalonlinesetup_name": {
+      "value": "stproddigitalonlinesetup"
+    },
+    "serverfarms_asp_prod_digital_onlinesetup_shared_name": {
+      "value": "asp-prod-digital-onlinesetup-shared"
+    },
+    "components_ai_prod_remserv_digital_onlinesetup_shared_name": {
+      "value": "ai-prod-remserv-digital-onlinesetup-shared"
+    }
+  }
+}

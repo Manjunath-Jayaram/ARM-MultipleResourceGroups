@@ -1,0 +1,37 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "serverfarmName": {
+      "type": "string"
+    },
+    "serverfarmLocation": {
+      "type": "string"
+    },
+    "serverfarmResourceGroup": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "ap-prod-remserv-digital-onlinesetup-govName": "[concat('ap-prod-remserv-digital-onlinesetup-gov', uniqueString(resourceGroup().id))]"
+  },
+  "resources": [
+    {
+      "name": "[variables('ap-prod-remserv-digital-onlinesetup-govName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[parameters('serverfarmLocation')]",
+      "apiVersion": "2015-08-01",
+      "dependsOn": [ ],
+      "tags": {
+        "[concat('hidden-related:', resourceId(parameters('serverfarmResourceGroup'), 'Microsoft.Web/serverfarms', parameters('serverfarmName')))]": "Resource",
+        "displayName": "ap-prod-remserv-digital-onlinesetup-gov"
+      },
+      "properties": {
+        "name": "[variables('ap-prod-remserv-digital-onlinesetup-govName')]",
+        "serverFarmId": "[resourceId(parameters('serverfarmResourceGroup'), 'Microsoft.Web/serverfarms', parameters('serverfarmName'))]"
+      }
+    }
+  ],
+  "outputs": {
+  }
+}

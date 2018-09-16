@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "asp-prod-remserv-digital-online-setup-sharedName": {
+      "value": "asp-prod-remserv-digital-online-setup-shared"
+    },
+    "asp-prod-digital-onlinesetup-sharedName": {
+      "value": "asp-prod-digital-onlinesetup-shared"
+    },
+    "siteName": {
+      "value": "ap-prod-remserv-digital-onlinesetup-gov"
+    },
+    "siteResourceGroup": {
+      "value": "rg-prod-remserv-digital-onlinesetup-gov"
+    }
+  }
+}

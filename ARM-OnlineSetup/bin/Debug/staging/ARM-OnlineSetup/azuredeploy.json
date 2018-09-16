@@ -1,0 +1,105 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "storageAccounts_stproddigitalonlinesetup_name": {
+        "defaultValue": "stproddigitalonlinesetup",
+        "type": "String"
+      },
+        "serverfarms_asp_prod_digital_onlinesetup_shared_name": {
+            "defaultValue": "asp-prod-digital-onlinesetup-shared",
+            "type": "String"
+        },
+        "components_ai_prod_remserv_digital_onlinesetup_shared_name": {
+            "defaultValue": "ai-prod-remserv-digital-onlinesetup-shared",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "comments": "Generalized from resource: '/subscriptions/fa801c3f-d70d-49cf-84fe-1cc1dfa79675/resourceGroups/rg-prod-remserv-digital-onlinesetup-shared/providers/microsoft.insights/components/ai-prod-remserv-digital-onlinesetup-shared'.",
+            "type": "microsoft.insights/components",
+            "kind": "web",
+            "name": "[parameters('components_ai_prod_remserv_digital_onlinesetup_shared_name')]",
+            "apiVersion": "2015-05-01",
+            "location": "southeastasia",
+            "tags": {
+                "hidden-link:/subscriptions/fa801c3f-d70d-49cf-84fe-1cc1dfa79675/resourceGroups/rg-prod-remserv-digital-onlinesetup-gov/providers/Microsoft.Web/sites/ap-prod-remserv-digital-onlinesetup-gov": "Resource",
+                "hidden-link:/subscriptions/fa801c3f-d70d-49cf-84fe-1cc1dfa79675/resourceGroups/rg-prod-remserv-digital-onlinesetup-non-gov/providers/Microsoft.Web/sites/ap-prod-remserv-digital-onlinesetup-non-gov": "Resource"
+            },
+            "scale": null,
+            "properties": {
+                "Application_Type": "web",
+                "Flow_Type": "Redfield",
+                "Request_Source": "IbizaAIExtension",
+                "HockeyAppId": null,
+                "SamplingPercentage": null
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/fa801c3f-d70d-49cf-84fe-1cc1dfa79675/resourceGroups/rg-prod-remserv-digital-onlinesetup-shared/providers/Microsoft.Storage/storageAccounts/stproddigitalonlinesetup'.",
+            "type": "Microsoft.Storage/storageAccounts",
+            "sku": {
+                "name": "Standard_RAGRS",
+                "tier": "Standard"
+            },
+            "kind": "BlobStorage",
+            "name": "[parameters('storageAccounts_stproddigitalonlinesetup_name')]",
+            "apiVersion": "2018-03-01-preview",
+            "location": "australiasoutheast",
+            "tags": {},
+            "scale": null,
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": false,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "enabled": true
+                        },
+                        "blob": {
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                },
+                "accessTier": "Hot"
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/fa801c3f-d70d-49cf-84fe-1cc1dfa79675/resourceGroups/rg-prod-remserv-digital-onlinesetup-shared/providers/Microsoft.Web/serverfarms/asp-prod-digital-onlinesetup-shared'.",
+            "type": "Microsoft.Web/serverfarms",
+            "sku": {
+                "name": "P2v2",
+                "tier": "PremiumV2",
+                "size": "P2v2",
+                "family": "Pv2",
+                "capacity": 1
+            },
+            "kind": "app",
+            "name": "[parameters('serverfarms_asp_prod_digital_onlinesetup_shared_name')]",
+            "apiVersion": "2016-09-01",
+            "location": "Australia Southeast",
+            "scale": null,
+            "properties": {
+                "name": "[parameters('serverfarms_asp_prod_digital_onlinesetup_shared_name')]",
+                "workerTierName": null,
+                "adminSiteName": null,
+                "hostingEnvironmentProfile": null,
+                "perSiteScaling": false,
+                "reserved": false,
+                "targetWorkerCount": 0,
+                "targetWorkerSizeId": 0
+            },
+            "dependsOn": []
+        }
+    ]
+}
